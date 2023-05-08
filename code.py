@@ -6,6 +6,7 @@ isWaiting = False
 currrentLight = 0
 level = 0
 stage = "STARTUP"
+target = 0
 
 colorsDark = [0x220000, 0x221100, 0x222200, 0x112200,
 0x002200, 0x002211, 0x002222, 0x000022, 0x110022, 0x220011]
@@ -23,10 +24,21 @@ def startup():
         setColor(i)
         sleep(1)
 
-def getTarget():
-    pass
+def getNewTarget():
+    newTarget = currentLight
+    while(newTarget == currentLight):
+        newTarget = randrange(0, 10)
+    return newTarget
+
+def setTarget(target):
+    cpx.pixels[target] = colorsLit[level]
 
 while True:
     if stage == "STARTUP":
         startup()
+        stage = "SETTING TARGET"
+        
+    elif stage == "SETTING TARGET":
+        target = getNewTarget()
         stage = "PLAYING"
+        cpx.pixels[target] = colorsLit[level]
