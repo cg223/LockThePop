@@ -75,5 +75,8 @@ while True:
                     level += 1
                     count = 0
                     interval *= 0.9
+            
+            else:
+                pass
     sleep(interval)
 
