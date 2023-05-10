@@ -125,53 +125,60 @@ def getNewTarget(currentLight):
 steps = 0
 
 while True:
-    steps += 1
-    if steps % interval == 0:
-        if stage == "STARTUP":
+    if stage == "STARTUP":
+        if cpx.button_a:
             startup()
             stage = "SETTING TARGET"
+    else:
+        steps += 1
+        if steps % interval == 0:
 
-        elif stage == "SETTING TARGET":
-            target = getNewTarget(currentLight)
-            stage = "PLAYING"
+            if stage == "SETTING TARGET":
+                target = getNewTarget(currentLight)
+                stage = "PLAYING"
 
-        elif stage == "PLAYING":
-            for i in range(10):
-                if i == target:
-                    cpx.pixels[i] = colorsTarget[level]
-                elif i == currentLight:
-                    cpx.pixels[i] = colorsLit[level]
+            elif stage == "PLAYING":
+                for i in range(10):
+                    if i == target:
+                        cpx.pixels[i] = colorsTarget[level]
+                    elif i == currentLight:
+                        cpx.pixels[i] = colorsLit[level]
+                    else:
+                        cpx.pixels[i] = colorsDark[level]
+
+                if isIncreasing:
+                    currentLight += 1
                 else:
-                    cpx.pixels[i] = colorsDark[level]
+                    currentLight -= 1
 
-            if isIncreasing:
-                currentLight += 1
-            else:
-                currentLight -= 1
+                if currentLight == -1:
+                    currentLight = 9
+                elif currentLight == 10:
+                    currentLight = 0
 
-            if currentLight == -1:
-                currentLight = 9
-            elif currentLight == 10:
-                currentLight = 0
-
-    if stage == "PLAYING":
-        if cpx.button_a:
-            if isIncreasing:
-                if currentLight == target+1:
-                    target = getNewTarget(currentLight)
-                    isIncreasing = False
-                    count += 1
-                    if count == 5:
-                        level += 1
-                        count = 0
-                        interval *= 0.9
-            else:
-                if currentLight == target-1:
-                    target = getNewTarget(currentLight)
-                    isIncreasing = True
-                    count += 1
-                    if count == 5:
-                        level += 1
-                        count = 0
-                        interval *= 0.9
+        if stage == "PLAYING":
+            if cpx.button_a:
+                if isIncreasing:
+                    if currentLight == target+1:
+                        steps = 0
+                        target = getNewTarget(currentLight)
+                        isIncreasing = False
+                        count += 1
+                        if count == 5:
+                            level += 1
+                            count = 0
+                            #interval *= 0.9
+                            print(f"""level: {level}
+count: {count}
+interval: {interval}""")
+                else:
+                    if currentLight == target-1:
+                        steps = 0
+                        target = getNewTarget(currentLight)
+                        isIncreasing = True
+                        count += 1
+                        if count == 5:
+                            level += 1
+                            count = 0
+                            #interval *= 0.9
 
