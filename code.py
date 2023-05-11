@@ -10,6 +10,7 @@ isIncreasing = True
 count = 0
 interval = 5000
 duration = 1
+held = False
 
 colorsDark = [0x100000, 0x151000, 0x101000, 0x051000,
 0x001000, 0x001005, 0x001010, 0x000010, 0x050010, 0x100005]
@@ -50,6 +51,10 @@ def getNewTarget(currentLight):
         newTarget = randrange(0, 10)
     return newTarget
 
+def end():
+    for i in range(10):
+        cpx.pixels[i] = 0xFF0000
+
 steps = 0
 
 while True:
@@ -86,26 +91,74 @@ while True:
 
     if stage == "PLAYING":
         if cpx.button_a:
-            if isIncreasing:
-                if currentLight == target+1:
-                    steps = 0
-                    target = getNewTarget(currentLight)
-                    isIncreasing = False
-                    count += 1
-                    if count == 5:
-                        level += 1
-                        count = 0
-                        interval *= 0.7
-                        interval = round(interval)
-            else:
-                if currentLight == target-1:
-                    steps = 0
-                    target = getNewTarget(currentLight)
-                    isIncreasing = True
-                    count += 1
-                    if count == 5:
-                        level += 1
-                        count = 0
-                        interval *= 0.7
-                        interval = round(interval)
+            if not held:
+                if isIncreasing:
+                    print(f'current: {currentLight}, target: {target+1}')
+                    if currentLight == target+1:
+                        steps = 0
+                        target = getNewTarget(currentLight)
+                        isIncreasing = False
+                        count += 1
+                        if count == 5:
+                            level += 1
+                            count = 0
+                            interval *= 0.7
+                            interval = round(interval)
+                            cpx.play_tone(tones[level], 1)
+                            if level == 10:
+                                stage = "WON"
+                    else:
+                        end()
+                        stage = "LOST"
+                else:
+                    print(f'current: {currentLight}, target: {target}')
+                    if currentLight == target-1:
+                        steps = 0
+                        target = getNewTarget(currentLight)
+                        isIncreasing = True
+                        count += 1
+                        if count == 5:
+                            level += 1
+                            count = 0
+                            interval *= 0.7
+                            interval = round(interval)
+                            cpx.play_tone(tones[level], 1)
+                            if level == 10:
+                                stage = "WON"
+                    else:
+                        end()
+                        stage = "LOST"
+                held = True
+        else:
+            held = False
+
+    elif stage == "LOST":
+        if cpx.button_a:
+            if not held:
+                held = True
+                steps = 0
+                stage = 0
+                count = 0
+                interval = 5000
+                startup()
+                stage = "SETTING TARGET"
+                currentLight = 0
+        else:
+            held = False
+
+    elif stage=="WON":
+        cpx.play_tone(830, 0.25)
+        for i in range(10):
+            cpx.pixels[i] = 0x00FF00
+        if cpx.button_a:
+            if not held:
+                held = True
+                steps = 0
+                stage = 0
+                count = 0
+                interval = 5000
+                startup()
+                stage = "SETTING TARGET"
+        else:
+            held = False
 
